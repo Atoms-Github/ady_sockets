@@ -1,20 +1,18 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-#![feature(core_intrinsics)]
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 #![allow(unused_unsafe)]
-#![feature(drain_filter)]
 #![allow(unused_attributes)]
 
 
+mod compression;
 use crossbeam_channel::*;
 use std::net::{SocketAddr, UdpSocket, TcpListener, TcpStream, Shutdown};
 use std::collections::HashMap;
 use std::{thread, io};
 use std::io::{Error, ErrorKind, Write, Read};
 
-mod compression;
 use bimap::BiMap;
 use std::sync::{Arc, RwLock};
 use std::str::FromStr;
@@ -176,7 +174,7 @@ impl<T :  'static + Send + Serialize + DeserializeOwned> NetHubBottom<T>{
                             }
                         }
                     }
-                }
+                };
             }
         });
     }
@@ -484,22 +482,5 @@ impl<T :  'static + Send + Serialize + DeserializeOwned> NetClientBottom<T>{
                 }
             }
         });
-    }
-}
-
-pub fn start_client<T :  'static + Send + Serialize + DeserializeOwned>(conn_address: String) -> NetClientTop<T> {
-    let (down_sink, down_rec) = unbounded();
-    let (up_sink, up_rec) = unbounded();
-
-    let connected = Arc::new(RwLock::new(BiMap::<PlayerID, SocketAddr>::new()));
-
-    let bottom = NetClientBottom{
-        conn_address,
-        down: down_rec,
-        up: up_sink,
-    }.start();
-    NetClientTop{
-        up: up_rec,
-        down: down_sink
     }
 }
